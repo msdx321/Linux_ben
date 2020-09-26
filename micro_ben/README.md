@@ -12,6 +12,6 @@ The whole picture is,
 ### How to run this micro-benchmark
 You should be able to directly make this micro-benchmark. You can run the server by simply `./server`.
 
-For the client, you can refer to Linux_client which is a modified version of facebook mcblast. There are multiple test scripts. You can use `multi_client.sh [FLOW_NUM] [RATE]` for basic tests. It will generate multiple flows which equals your input each has the sending rate you've input.
+For the client, you can refer to [Linux_client](https://github.com/WenyuanShao/Linux_ben/tree/master/Linux_client) which is a modified version of facebook mcblast. There are multiple test scripts. You can use `multi_client.sh [FLOW_NUM] [RATE]` for basic tests. It will generate multiple flows which equals your input each has the sending rate you've input.
 
 This script will keep sending and receiving packets for 30 seconds and generate log files in `logs` folder. You can use `python data_aggreate.py logs/` to parse the results in this folder. 
