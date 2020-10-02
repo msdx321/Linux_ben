@@ -14,7 +14,7 @@ flow_per_core = 50
 rate=[]
 
 class client(object):
-    def __init__(self, server_port, client_port, core, rate):
+    def __init__(self, server_port, client_port, core, rate, spin_time):
         self.server_port = server_port
         self.client_port = client_port
 
@@ -23,7 +23,7 @@ class client(object):
 
         self.args = ["taskset"]
         self.args.extend(["-c", str(core)])
-        self.args.extend(["./mcblaster"])
+        self.args.extend(["./../mcblaster"])
         self.args.extend(["-k", str(k)])
         self.args.extend(["-t", str(t)])
         self.args.extend(["-z", str(z)])
@@ -31,6 +31,7 @@ class client(object):
         self.args.extend(["-f", str(client_port)])
         self.args.extend(["-r", str(rate)])
         self.args.extend(["-d", str(d)])
+        self.args.extend(["-i", str(spin_time)])
         self.args.extend(["{}".format(server)])
 
         self.log_file_path, log_file = self.create_log()
@@ -59,15 +60,16 @@ def increment_core_num(core):
 
 def start_clients(nb_nodes, client_port, nb_hi):
     client_list=[]
-    server_port = 11410
+    server_port = 11211
     rate = 25
+    spin_time = 100
     for i in range(nb_nodes):
         nc = increment_core_num(0)
         if i >= nb_hi:
-            server_port = 11315
             rate = 200
+            spin_time = 5
 
-        client_list.append(client(server_port, client_port, nc, rate))
+        client_list.append(client(server_port, client_port, nc, rate, spin_time))
 
         if client_port > 0 and server_port > 0:
             client_port += 1

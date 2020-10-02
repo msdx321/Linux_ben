@@ -196,6 +196,7 @@ static int nkeys=10000;
 static int nreplyports;
 static int rates[reqtype_n]; /* try to send this many
                                 sets and gets per second */
+static int spin_time=0;
 static int valsz=100;
 static int duration;    /* run duration in seconds */
 static bool quiet=true;
@@ -244,7 +245,7 @@ stats_update_rtts(stats_t *st, uint64_t tsent, uint64_t treply, double cpufreq) 
 
   if (rtt < st->rtt_min)
     st->rtt_min = rtt;
-  printf("rtt: %llu ",rtt);
+  printf("RTT: %lu\n", (uint64_t)(rtt / cpufreq));
   if (rtt > st->rtt_max)
     st->rtt_max = rtt;
 
@@ -554,7 +555,7 @@ static void conn_init(conn_t *conn, int maxoutstanding, int maxmsgsize,
 
 
 static inline int compose_get(char *buf, int bufsize, int k) {
-  return snprintf(buf, bufsize, "get " KEYPREFIX "-%06d\r\n", k);
+  return snprintf(buf, bufsize, "get " KEYPREFIX "-%06d\r\n", spin_time);
 }
 
 static inline int compose_set(char *buf, int bufsize, int k) {
@@ -957,7 +958,7 @@ static inline int dgram_ap_send(dgram_ap_t *ap, reqtype_t t) {
   if (generation) k = (gl_ley++) % nkeys;
 
   to_udp_header(buf, ap->reqs.nextrqid, nreplyports);
-
+  
   if (t == req_get) {
 	  dgsize = compose_get(buf+8, sizeof(buf)-8, k) + 8;
   } else {
@@ -1309,6 +1310,7 @@ int usage(void) {
 "  -w N              try to send N sets per second (default 0)\n"
 "  -x N              the number of UDP reply ports (default 0)\n"
 "  -z N              value size in bytes, default 100\n"
+"  -i N              the spin time of this flow\n"
 "\n");
 
   return 0;
@@ -1423,7 +1425,7 @@ int main(int argc, char *argv[]) {
         maxthreads);
   }
 
-  while ((opt=getopt(argc, argv, "p:u:c:d:k:nqr:s:t:w:x:z:f:g:")) != EOF) {
+  while ((opt=getopt(argc, argv, "p:u:c:d:k:nqr:s:t:w:x:z:f:g:i:")) != EOF) {
     switch (opt) {
 
     case 'p':
@@ -1525,6 +1527,13 @@ int main(int argc, char *argv[]) {
       }
       break;
 
+    case 'i':
+      spin_time = atoi(optarg);
+      if (spin_time <= 0) {
+        die("Invalid spin time: %s\n", optarg);
+      }
+      break;
+
     case '?':
       die("Unknown option -%c\n", optopt);
     }
@@ -1623,7 +1632,7 @@ int main(int argc, char *argv[]) {
       die("pthread_join() failed with %d for thread #%i\n", i, errno);
   }
 
-  //print_stats();
+  print_stats();
 
   return 0;
 }

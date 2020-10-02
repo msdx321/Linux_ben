@@ -10,6 +10,16 @@ struct port2pid *p2p = NULL;
 struct fd2port  *f2p = NULL;
 volatile unsigned long long it;
 unsigned long long hash_mask = ~(unsigned long long)1 >> 32;
+unsigned long long cyc_per100loop;
+
+static inline unsigned long long
+mb_tsc(void) {
+	unsigned long a, d, c;
+
+	__asm__ __volatile__("rdtsc" : "=a" (a), "=d" (d), "=c" (c) : : );
+
+	return ((unsigned long long)d << 32) | (unsigned long long)a;
+}
 
 void
 print_recv(char *recv, int len)
@@ -22,7 +32,7 @@ print_recv(char *recv, int len)
 	printf("\n");
 }
 
-void
+static inline void
 spin_delay(unsigned long long loop)
 {
 	while (it < loop) {
@@ -32,16 +42,30 @@ spin_delay(unsigned long long loop)
 	return;
 }
 
+static inline unsigned long long
+cyc2loop(unsigned long long spin_time)
+{
+	unsigned long long loop;
+
+	loop = (spin_time/cyc_per100loop)*100;
+
+	return loop;
+}
+
 int
-handle_ekf(int ifd_read, int ofd_write)
+handle_ekf(int ifd_read, int ofd_write, unsigned int spin)
 {
 
 	char data[MAX_LEN];
 	int  len;
 
-	while (1) { 
+	unsigned long long stime = spin * 2900;
+	unsigned long long loop = cyc2loop(stime);
+	
+	//printf("spin: %d\n", spin);
+	while (1) {
     	len = read(ifd_read, data, MAX_LEN);
-		//spin_delay();
+		spin_delay(loop);
 		len = write(ofd_write, data, len);
     }
 	close(ifd_read);
@@ -61,7 +85,15 @@ main(int argc, char *argv[]) {
 	int       tmp, ip, port;
 	struct    port2pid *p;
 	
+	unsigned int       spin_time = 0;
 	unsigned long long iport = 0, ipp;
+	unsigned long long s, e;
+
+	s = mb_tsc();
+	spin_delay(100000);
+	e = mb_tsc();
+	cyc_per100loop = (e-s)/1000;
+
 
    	serverAddr.sin_family = PF_INET;
    	serverAddr.sin_port = htons(SERVER_PORT);
@@ -97,6 +129,7 @@ main(int argc, char *argv[]) {
 		for (i = 0; i < ep_wait; ++i) {
 			if (events[i].data.fd == listener) {
 				bytes_recv = recvfrom(listener, recv_data, MAX_LEN, 0, (struct sockaddr*)&clientAddr, &cliLen);
+				spin_time = atoi(recv_data+25) * 10;
 				if (bytes_recv < 0) {
 					perror("recvfrom error");
 					exit(-1);
@@ -122,7 +155,7 @@ main(int argc, char *argv[]) {
 					} else if (pid == 0) { // child
 						close(in_fd[1]);
 						close(out_fd[0]);
-						handle_ekf(in_fd[0], out_fd[1]);
+						handle_ekf(in_fd[0], out_fd[1], spin_time);
 					} else { //parent
 						add_port2pid(&p2p, iport, pid, in_fd, out_fd);
 						add_fd2port(&f2p, out_fd[0], iport);
