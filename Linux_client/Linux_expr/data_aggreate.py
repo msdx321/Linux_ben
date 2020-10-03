@@ -82,8 +82,8 @@ def parse_stats(fn):
                 pass
             elif not line.strip():
                 pass
-            else:
-                print 'result parse error!!', line
+#else:
+#                print 'result parse error!!', line
     return (read_stats, write_stats)
 
 
