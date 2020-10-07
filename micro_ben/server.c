@@ -130,6 +130,7 @@ main(int argc, char *argv[]) {
 			if (events[i].data.fd == listener) {
 				bytes_recv = recvfrom(listener, recv_data, MAX_LEN, 0, (struct sockaddr*)&clientAddr, &cliLen);
 				spin_time = atoi(recv_data+25) * 10;
+				assert(spin_time == 50 || spin_time == 1000);
 				if (bytes_recv < 0) {
 					perror("recvfrom error");
 					exit(-1);
