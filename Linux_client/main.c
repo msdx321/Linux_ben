@@ -245,7 +245,6 @@ stats_update_rtts(stats_t *st, uint64_t tsent, uint64_t treply, double cpufreq) 
 
   if (rtt < st->rtt_min)
     st->rtt_min = rtt;
-  printf("RTT: %lu\n", (uint64_t)(rtt / cpufreq));
   if (rtt > st->rtt_max)
     st->rtt_max = rtt;
 
@@ -1323,6 +1322,7 @@ void print_stats(void) {
   reqtype_t t;
   uint64_t elapsed_usec=0; /* elapsed time in microseconds */
   double cpufreq=0; /* average cpu frequency for all threads */
+  int cnt;
 
   for (t=0; t<reqtype_n; t++) {
     stats_init(&totals[t]);
@@ -1401,10 +1401,15 @@ Ignored pkts   : %lu\n",
 
   /*DEBUG*/
   /*printf("\n%.2f pollfd structs per poll()\n",
-         (double)threads[0].nufds/threads[0].npolls);
-  for(i=1; i<SAMPLE_NUM; i++) {
-    if (threads[0].stats[req_get].samples[i]) printf("%lu\n", threads[0].stats[req_get].samples[i]);
-  }*/
+         (double)threads[0].nufds/threads[0].npolls);*/
+  if (totals[0].nmeasured > SAMPLE_NUM)
+	  cnt = SAMPLE_NUM;
+  else
+	  cnt = totals[0].nmeasured;
+
+  for(i=1; i<cnt; i++) {
+    if (threads[0].stats[req_get].samples[i]) printf("RTT: %lu\n", threads[0].stats[req_get].samples[i]);
+  }
 }
 
 

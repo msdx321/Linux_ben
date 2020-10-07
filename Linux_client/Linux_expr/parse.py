@@ -4,10 +4,9 @@ import numpy as np
 
 #file = str(sys.argv[1])
 s_file = 0
-nb = 0
 num = 0
 
-def parse_file(head, number):
+def parse_file(head, number, bimodal):
     res_avg = 0
     tail = 0
     tot = []
@@ -26,29 +25,31 @@ def parse_file(head, number):
                     res_min = min(res_min, temp);
                     res_max = max(res_max, temp);
                     res_avg += temp
-	            tot.append(temp)
-	            length += 1
+                    length += 1
+                    tot.append(temp)
                 elif line.startswith("Requests sent"):
                     temp = int(line.split(None)[-1].strip())
                     tot_sent += temp
 
     tot.sort()
+    print(length)
     tail = int(length*0.99)
 
-    print "[hi]parsed file:                {} - {}".format("mcb_"+str(s_file), "mcb_"+str(s_file+nb))
-    print "[hi]tail latecny:               {} us".format(tot[tail])
-    print "[hi]avgerage latency:           {} us".format(res_avg/length)
-    print "[hi]MIN latency:                {} us".format(res_min)
-    print "[hi]MAX latency:                {} us".format(res_max)
-    print "[hi]number of RTTs measured:    {}".format(length)
-    print "[hi]number of requests dropped: {}".format(tot_sent-length)
+    print "[{}]parsed file:                {} - {}".format(bimodal, "mcb_"+str(s_file), "mcb_"+str(s_file+number))
+    print "[{}]tail latecny:               {} us".format(bimodal, tot[tail])
+    print "[{}]avgerage latency:           {} us".format(bimodal, res_avg/length)
+    print "[{}]MIN latency:                {} us".format(bimodal, res_min)
+    print "[{}]MAX latency:                {} us".format(bimodal, res_max)
+    print "[{}]number of RTTs measured:    {}".format(bimodal, length)
+    print "[{}]number of requests dropped: {}".format(bimodal, tot_sent-length)
     print "-----------------------------------------------------------"
 
 if __name__ == "__main__":
     s_file = 11211
     nb = int(sys.argv[1])
     num = int(sys.argv[2])
-    print "hi flow"
-    parse_file(s_file, nb)
+    if nb > 0:
+        print "hi flow"
+        parse_file(s_file, nb, "hi")
     print "lo_flow"
-    parse_file(s_file+nb, num-nb)
+    parse_file(s_file+nb, num-nb, "low")

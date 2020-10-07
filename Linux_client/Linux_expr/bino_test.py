@@ -89,7 +89,7 @@ if __name__ == '__main__':
     args = parse_args()
     server = "10.10.1.2"
     nb_nodes = args.nb_nodes if args.nb_nodes else 50
-    nb_cores = args.nb_cores if args.nb_cores else 4
+    nb_cores = args.nb_cores if args.nb_cores else 48
     nb_hi = args.nb_hi if args.nb_hi else 0
     client_port = 11211
 
