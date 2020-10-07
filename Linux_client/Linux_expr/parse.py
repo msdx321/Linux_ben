@@ -14,6 +14,8 @@ def parse_file(head, number, bimodal):
     res_min = float("inf")
     res_max = 0
     tot_sent = 0
+    tot_missed = 0
+    tot_drop = 0
 
     for c in range(number):
         idx = head + c
@@ -30,10 +32,14 @@ def parse_file(head, number, bimodal):
                 elif line.startswith("Requests sent"):
                     temp = int(line.split(None)[-1].strip())
                     tot_sent += temp
+                elif line.startswith("Deadline missed:"):
+                    temp = int(line.split(None)[-1].strip())
+                    tot_missed += temp
 
     tot.sort()
     print(length)
     tail = int(length*0.99)
+    tot_drop = tot_sent-length
 
     print "[{}]parsed file:                {} - {}".format(bimodal, "mcb_"+str(s_file), "mcb_"+str(s_file+number))
     print "[{}]tail latecny:               {} us".format(bimodal, tot[tail])
@@ -41,7 +47,8 @@ def parse_file(head, number, bimodal):
     print "[{}]MIN latency:                {} us".format(bimodal, res_min)
     print "[{}]MAX latency:                {} us".format(bimodal, res_max)
     print "[{}]number of RTTs measured:    {}".format(bimodal, length)
-    print "[{}]number of requests dropped: {}".format(bimodal, tot_sent-length)
+    print "[{}]number of requests dropped: {}".format(bimodal, tot_drop)
+    print "[{}]% of deadline miss:         {}%".format(bimodal, (tot_missed+tot_drop)*100/tot_sent)
     print "-----------------------------------------------------------"
 
 if __name__ == "__main__":

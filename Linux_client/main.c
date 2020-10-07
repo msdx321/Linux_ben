@@ -80,7 +80,8 @@ typedef struct stats_s {
            nsent,     /* number of sent requests */
            nfailed,   /* number of reported errors */
            nbogus,    /* number of malformed replies */
-           nignore;   /* number of reported errors */
+           nignore,   /* number of reported errors */
+           missed;
 
   uint64_t samples[SAMPLE_NUM];
 
@@ -196,6 +197,7 @@ static int nkeys=10000;
 static int nreplyports;
 static int rates[reqtype_n]; /* try to send this many
                                 sets and gets per second */
+static unsigned long long deadline;
 static int spin_time=0;
 static int valsz=100;
 static int duration;    /* run duration in seconds */
@@ -243,6 +245,8 @@ static inline void
 stats_update_rtts(stats_t *st, uint64_t tsent, uint64_t treply, double cpufreq) {
   uint64_t rtt = treply - tsent;
 
+  if (rtt / cpufreq > deadline)
+	  st->missed++;
   if (rtt < st->rtt_min)
     st->rtt_min = rtt;
   if (rtt > st->rtt_max)
@@ -1341,6 +1345,7 @@ void print_stats(void) {
       totals[t].nfailed += threads[n].stats[t].nfailed;
       totals[t].nbogus += threads[n].stats[t].nbogus;
       totals[t].nignore += threads[n].stats[t].nignore;
+      totals[t].missed += threads[n].stats[t].missed;
 
       for (i=0;
            i<sizeof(totals[t].rtt_buckets)/sizeof(totals[t].rtt_buckets[0]);
@@ -1371,7 +1376,8 @@ RTT min/avg/max: %lu/%lu/%lu usec\n\
 Timeouts       : %lu\n\
 Errors         : %lu\n\
 Invalid replies: %lu\n\
-Ignored pkts   : %lu\n",
+Ignored pkts   : %lu\n\
+Deadline missed: %lu\n",
              reqtype_str[t],
              totals[t].nsent,
              (double)totals[t].nsent*1000000/elapsed_usec,
@@ -1382,7 +1388,8 @@ Ignored pkts   : %lu\n",
              totals[t].ntimedout,
              totals[t].nfailed,
              totals[t].nbogus,
-             totals[t].nignore);
+             totals[t].nignore,
+		     totals[t].missed);
     }
   }
 
@@ -1493,6 +1500,7 @@ int main(int argc, char *argv[]) {
       if (rates[req_get] <= 0) {
         die("Invalid number of requests per second: %s\n", optarg);
       }
+	  deadline = (unsigned long long)1000000 / rates[req_get];
       break;
 
     case 's':
