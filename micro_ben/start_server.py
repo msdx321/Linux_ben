@@ -46,5 +46,6 @@ if __name__ == '__main__':
     args = parse_args()
     start_port = 11211
     nb_servers = args.nb_servers if args.nb_servers else 1
+    ncores = args.c if args.c else 1
 
     ws_list = start_server(start_port, nb_servers)

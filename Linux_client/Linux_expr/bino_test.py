@@ -73,7 +73,7 @@ def start_clients(nb_nodes, client_port, nb_hi):
 
         if client_port > 0 and server_port > 0:
             client_port += 1
-
+            server_port += 1
         
     return client_list
 
