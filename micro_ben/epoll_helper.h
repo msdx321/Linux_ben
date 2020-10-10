@@ -16,7 +16,7 @@
 //#define SERVER_IP "127.0.0.1"
  
 // server port
-#define SERVER_PORT 11211
+//#define SERVER_PORT 11211
  
 //epoll size
 #define EPOLL_SIZE 5000

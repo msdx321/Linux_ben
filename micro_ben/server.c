@@ -6,11 +6,30 @@
 
 #define MAX_LEN 128
 
+struct opts_struct
+{
+	int server_port;
+};
+
 struct port2pid *p2p = NULL;
 struct fd2port  *f2p = NULL;
 volatile unsigned long long it;
 unsigned long long hash_mask = ~(unsigned long long)1 >> 32;
 unsigned long long cyc_per100loop;
+struct opts_struct opts = {11211};
+
+void getopts(int argc, char** argv)
+{
+	int count = 1;
+
+	while (count < argc) {
+		if (strcmp(argv[count], "--server_port") == 0) {
+			if (++count < argc)
+				opts.server_port = atoi(argv[count]);
+		}
+		count++;
+	}
+}
 
 static inline unsigned long long
 mb_tsc(void) {
@@ -62,7 +81,6 @@ handle_ekf(int ifd_read, int ofd_write, unsigned int spin)
 	unsigned long long stime = spin * 2900;
 	unsigned long long loop = cyc2loop(stime);
 	
-	//printf("spin: %d\n", spin);
 	while (1) {
     	len = read(ifd_read, data, MAX_LEN);
 		spin_delay(loop);
@@ -89,6 +107,7 @@ main(int argc, char *argv[]) {
 	unsigned long long iport = 0, ipp;
 	unsigned long long s, e;
 
+	getopts(argc, argv);
 	s = mb_tsc();
 	spin_delay(100000);
 	e = mb_tsc();
@@ -96,7 +115,7 @@ main(int argc, char *argv[]) {
 
 
    	serverAddr.sin_family = PF_INET;
-   	serverAddr.sin_port = htons(SERVER_PORT);
+   	serverAddr.sin_port = htons(opts.server_port);
    	serverAddr.sin_addr.s_addr = inet_addr("10.10.1.2");
 	
     socklen_t cliLen = sizeof(clientAddr); 
@@ -112,7 +131,7 @@ main(int argc, char *argv[]) {
        	perror("bind error");
        	exit(-1);
    	}
-	printf("bind to 10.10.1.2:%d\n\t---->success\n", SERVER_PORT);
+	printf("bind to 10.10.1.2:%d\n\t---->success\n", opts.server_port);
 
 	//create epoll
     int epfd = epoll_create(EPOLL_SIZE);

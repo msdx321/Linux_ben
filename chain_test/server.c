@@ -115,7 +115,7 @@ main(int argc, char *argv[]) {
 
 	if (argc > 1)
 		getopts(argc, argv);
-	assert(chain_len < 10);
+	assert(chain_len < 20);
 
 	serverAddr.sin_family = PF_INET;
    	serverAddr.sin_port = htons(SERVER_PORT);
