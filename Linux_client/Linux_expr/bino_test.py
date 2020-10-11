@@ -4,6 +4,7 @@ import time
 
 cur_core = 0
 nb_cores = 1
+nb_server = 1
 server = "10.10.1.2"
 t = 1
 k = 100
@@ -73,7 +74,7 @@ def start_clients(nb_nodes, client_port, nb_hi):
 
         if client_port > 0 and server_port > 0:
             client_port += 1
-            server_port += 1
+            server_port += (i%nb_servers)
         
     return client_list
 
@@ -82,6 +83,7 @@ def parse_args():
     parser.add_argument("--nb_nodes", help="number of nodes", type=int)
     parser.add_argument("--nb_cores", help="number of cores", type=int)
     parser.add_argument("--nb_hi", help="number of high rate flows", type=int)
+    parser.add_argument("--nb_servers", help="number of servers", type=int)
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -90,6 +92,7 @@ if __name__ == '__main__':
     server = "10.10.1.2"
     nb_nodes = args.nb_nodes if args.nb_nodes else 50
     nb_cores = args.nb_cores if args.nb_cores else 48
+	nb_servers = args.nb_servers if args.nb_servers else 1
     nb_hi = args.nb_hi if args.nb_hi else 0
     client_port = 11211
 

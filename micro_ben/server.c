@@ -83,6 +83,7 @@ handle_ekf(int ifd_read, int ofd_write, unsigned int spin)
 	
 	while (1) {
     	len = read(ifd_read, data, MAX_LEN);
+		assert(len > 0);
 		spin_delay(loop);
 		len = write(ofd_write, data, len);
     }
@@ -131,7 +132,7 @@ main(int argc, char *argv[]) {
        	perror("bind error");
        	exit(-1);
    	}
-	printf("bind to 10.10.1.2:%d\n\t---->success\n", opts.server_port);
+	//printf("bind to 10.10.1.2:%d\n\t---->success\n", opts.server_port);
 
 	//create epoll
     int epfd = epoll_create(EPOLL_SIZE);
