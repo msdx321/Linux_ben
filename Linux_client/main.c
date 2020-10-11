@@ -81,7 +81,7 @@ typedef struct stats_s {
            nfailed,   /* number of reported errors */
            nbogus,    /* number of malformed replies */
            nignore,   /* number of reported errors */
-           missed;
+           made;
 
   uint64_t samples[SAMPLE_NUM];
 
@@ -245,8 +245,8 @@ static inline void
 stats_update_rtts(stats_t *st, uint64_t tsent, uint64_t treply, double cpufreq) {
   uint64_t rtt = treply - tsent;
 
-  if (rtt / cpufreq > deadline)
-	  st->missed++;
+  if (rtt / cpufreq <= deadline)
+	  st->made++;
   if (rtt < st->rtt_min)
     st->rtt_min = rtt;
   if (rtt > st->rtt_max)
@@ -1345,7 +1345,7 @@ void print_stats(void) {
       totals[t].nfailed += threads[n].stats[t].nfailed;
       totals[t].nbogus += threads[n].stats[t].nbogus;
       totals[t].nignore += threads[n].stats[t].nignore;
-      totals[t].missed += threads[n].stats[t].missed;
+      totals[t].made += threads[n].stats[t].made;
 
       for (i=0;
            i<sizeof(totals[t].rtt_buckets)/sizeof(totals[t].rtt_buckets[0]);
@@ -1377,7 +1377,7 @@ Timeouts       : %lu\n\
 Errors         : %lu\n\
 Invalid replies: %lu\n\
 Ignored pkts   : %lu\n\
-Deadline missed: %lu\n",
+Deadline made  : %lu\n",
              reqtype_str[t],
              totals[t].nsent,
              (double)totals[t].nsent*1000000/elapsed_usec,
@@ -1389,7 +1389,7 @@ Deadline missed: %lu\n",
              totals[t].nfailed,
              totals[t].nbogus,
              totals[t].nignore,
-		     totals[t].missed);
+		     totals[t].made);
     }
   }
 
