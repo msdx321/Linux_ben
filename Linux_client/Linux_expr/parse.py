@@ -16,7 +16,7 @@ def parse_file(head, number, bimodal):
     tot_sent = 0
     tot_missed = 0
     tot_drop = 0
-	tot_recv = 0
+    tot_recv = 0
 
     for c in range(number):
         idx = head + c
@@ -36,13 +36,13 @@ def parse_file(head, number, bimodal):
                 elif line.startswith("Deadline missed:"):
                     temp = int(line.split(None)[-1].strip())
                     tot_missed += temp
-				elif line.startswith("Measured RTTs"):
+                elif line.startswith("Measured RTTs"):
                     temp = int(line.split(None)[-1].strip())
                     tot_recv += temp
 
     tot.sort()
     print(length)
-	assert(length > 0)
+    assert(length > 0)
     tail = int(length*0.99)
     tot_drop = tot_sent-tot_recv
 
