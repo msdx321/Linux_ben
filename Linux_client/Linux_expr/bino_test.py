@@ -62,6 +62,7 @@ def increment_core_num(core):
 def start_clients(nb_nodes, client_port, nb_hi):
     client_list=[]
     server_port = 11211
+    server_base = 11211
     rate = 25
     spin_time = 100
     for i in range(nb_nodes):
@@ -70,11 +71,11 @@ def start_clients(nb_nodes, client_port, nb_hi):
             rate = 200
             spin_time = 5
 
+        server_port = (i%nb_servers) + server_base
         client_list.append(client(server_port, client_port, nc, rate, spin_time))
 
         if client_port > 0 and server_port > 0:
             client_port += 1
-            server_port += (i%nb_servers)
         
     return client_list
 

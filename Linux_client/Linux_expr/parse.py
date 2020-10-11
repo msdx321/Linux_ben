@@ -52,6 +52,7 @@ def parse_file(head, number, bimodal):
     print "[{}]MIN latency:                {} us".format(bimodal, res_min)
     print "[{}]MAX latency:                {} us".format(bimodal, res_max)
     print "[{}]number of RTTs measured:    {}".format(bimodal, tot_recv)
+    print "[{}]Total request sent:         {}".format(bimodal, tot_sent)
     print "[{}]number of requests dropped: {}".format(bimodal, tot_drop)
     print "[{}]% of deadline miss:         {}%".format(bimodal, (tot_missed+tot_drop)*100/tot_sent)
     print "-----------------------------------------------------------"
