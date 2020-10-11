@@ -14,7 +14,7 @@ def parse_file(head, number, bimodal):
     res_min = float("inf")
     res_max = 0
     tot_sent = 0
-    tot_missed = 0
+    tot_made = 0
     tot_drop = 0
     tot_recv = 0
 
@@ -33,9 +33,9 @@ def parse_file(head, number, bimodal):
                 elif line.startswith("Requests sent"):
                     temp = int(line.split(None)[-1].strip())
                     tot_sent += temp
-                elif line.startswith("Deadline missed:"):
+                elif line.startswith("Deadline made"):
                     temp = int(line.split(None)[-1].strip())
-                    tot_missed += temp
+                    tot_made += temp
                 elif line.startswith("Measured RTTs"):
                     temp = int(line.split(None)[-1].strip())
                     tot_recv += temp
@@ -54,7 +54,7 @@ def parse_file(head, number, bimodal):
     print "[{}]number of RTTs measured:    {}".format(bimodal, tot_recv)
     print "[{}]Total request sent:         {}".format(bimodal, tot_sent)
     print "[{}]number of requests dropped: {}".format(bimodal, tot_drop)
-    print "[{}]% of deadline miss:         {}%".format(bimodal, (tot_missed+tot_drop)*100/tot_sent)
+    print "[{}]number of deadline made:    {}".format(bimodal, tot_made)
     print "-----------------------------------------------------------"
 
 if __name__ == "__main__":
