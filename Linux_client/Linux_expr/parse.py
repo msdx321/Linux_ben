@@ -17,6 +17,7 @@ def parse_file(head, number, bimodal):
     tot_made = 0
     tot_drop = 0
     tot_recv = 0
+	tot_miss = 0
 
     for c in range(number):
         idx = head + c
@@ -45,6 +46,7 @@ def parse_file(head, number, bimodal):
     assert(length > 0)
     tail = int(length*0.99)
     tot_drop = tot_sent-tot_recv
+	tot_miss = tot_sent-tot_made
 
     print "[{}]parsed file:                {} - {}".format(bimodal, "mcb_"+str(s_file), "mcb_"+str(s_file+number-1))
     print "[{}]tail latecny:               {} us".format(bimodal, tot[tail])
@@ -55,6 +57,7 @@ def parse_file(head, number, bimodal):
     print "[{}]Total request sent:         {}".format(bimodal, tot_sent)
     print "[{}]number of requests dropped: {}".format(bimodal, tot_drop)
     print "[{}]number of deadline made:    {}".format(bimodal, tot_made)
+    print "[{}]number of deadline miss:    {}".format(bimodal, tot_miss)
     print "-----------------------------------------------------------"
 
 if __name__ == "__main__":
