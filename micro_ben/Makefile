@@ -1,6 +1,6 @@
 #BIN=udpserver udpclient
 CC=gcc
-CFLAGS=-Wall -O3 -g
+CFLAGS=-Wall -O -g
 INCLUDE=-I .
 LIBS=
 CFILES=$(wildcard ./*.c)
