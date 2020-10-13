@@ -23,7 +23,7 @@ class client(object):
 
         self.args = ["taskset"]
         self.args.extend(["-c", str(core)])
-        self.args.extend(["./mcblaster"])
+        self.args.extend(["./../mcblaster"])
         self.args.extend(["-k", str(k)])
         self.args.extend(["-t", str(t)])
         self.args.extend(["-z", str(z)])
