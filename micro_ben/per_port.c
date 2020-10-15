@@ -82,8 +82,6 @@ handle_ekf(unsigned int spin)
 	s = mb_tsc();
 	spin_delay(loop);
 	e = mb_tsc();
-	printf("spin: %llu\n", (e-s)/2900);
-	assert((e-s) >= stime);
 
 	return 0;
 }
