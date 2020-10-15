@@ -75,13 +75,16 @@ cyc2loop(unsigned long long spin_time)
 int
 handle_ekf(unsigned int spin)
 {
-	unsigned long long stime = spin * 2900;
+	unsigned long long stime = spin * 2700;
 	unsigned long long loop = cyc2loop(stime);
 	unsigned long long e, s;
 	
 	s = mb_tsc();
 	spin_delay(loop);
 	e = mb_tsc();
+	while ((e-s) < stime) {
+		e = mb_tsc();
+	}
 
 	return 0;
 }
