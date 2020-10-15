@@ -6,7 +6,7 @@ import numpy as np
 s_file = 0
 num = 0
 
-def parse_file(head, number, bimodal):
+def parse_file(head, number, bimodal, dir):
     res_avg = 0
     tail = 0
     tot = []
@@ -21,7 +21,7 @@ def parse_file(head, number, bimodal):
 
     for c in range(number):
         idx = head + c
-        filename = "logs/mcb_"+str(idx)
+        filename = dir+"/mcb_"+str(idx)
         with open(filename, "r") as f:
             for line in f:
                 if line.startswith("RTT:"):
@@ -64,8 +64,9 @@ if __name__ == "__main__":
     s_file = 11211
     nb = int(sys.argv[1])
     num = int(sys.argv[2])
+    dir = sys.argv[3]
     if nb > 0:
         print "hi flow"
-        parse_file(s_file, nb, "hi")
+        parse_file(s_file, nb, "hi", dir)
     print "lo_flow"
-    parse_file(s_file+nb, num-nb, "low")
+    parse_file(s_file+nb, num-nb, "low", dir)
