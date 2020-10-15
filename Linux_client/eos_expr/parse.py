@@ -57,7 +57,7 @@ def parse_file(head, number, bimodal):
     print "[{}]Total request sent:         {}".format(bimodal, tot_sent)
     print "[{}]number of requests dropped: {}".format(bimodal, tot_drop)
     print "[{}]number of deadline made:    {}".format(bimodal, tot_made)
-    print "[{}]number of deadline missed:  {}".format(bimodal, tot_miss)
+    print "[{}]% of deadline missed:       {:.2f}".format(bimodal, (tot_miss)*100/tot_sent)
     print "-----------------------------------------------------------"
 
 if __name__ == "__main__":
