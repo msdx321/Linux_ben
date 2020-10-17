@@ -48,7 +48,7 @@ def parse_file(head, number, bimodal, dir):
     tot_drop = tot_sent-tot_recv
     tot_miss = tot_sent-tot_made
 
-    print "[{}]parsed file:                {} - {}".format(bimodal, "mcb_"+str(s_file), "mcb_"+str(s_file+number-1))
+    print "[{}]parsed file:                {} - {}".format(bimodal, "mcb_"+str(head), "mcb_"+str(head+number-1))
     print "[{}]tail latecny:               {} us".format(bimodal, tot[tail])
     print "[{}]avgerage latency:           {} us".format(bimodal, res_avg/length)
     print "[{}]MIN latency:                {} us".format(bimodal, res_min)
