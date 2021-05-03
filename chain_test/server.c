@@ -106,7 +106,6 @@ main(int argc, char *argv[]) {
 	unsigned int       spin_time = 0;
 	unsigned long long iport = 0, ipp;
 	unsigned long long s, e;
-	int idx = 0;
 
 	s = mb_tsc();
 	spin_delay(100000);
@@ -119,7 +118,7 @@ main(int argc, char *argv[]) {
 
 	serverAddr.sin_family = PF_INET;
    	serverAddr.sin_port = htons(SERVER_PORT);
-   	serverAddr.sin_addr.s_addr = inet_addr("10.10.1.2");
+   	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	
     socklen_t cliLen = sizeof(clientAddr); 
 
@@ -134,7 +133,7 @@ main(int argc, char *argv[]) {
        	perror("bind error");
        	exit(-1);
    	}
-	printf("bind to 10.10.1.2:%d\n\t---->success\n", SERVER_PORT);
+	printf("bind to 127.0.0.1:%d\n\t---->success\n", SERVER_PORT);
 
 	//create epoll
     int epfd = epoll_create(EPOLL_SIZE);
@@ -151,8 +150,7 @@ main(int argc, char *argv[]) {
 		for (i = 0; i < ep_wait; ++i) {
 			if (events[i].data.fd == listener) {
 				bytes_recv = recvfrom(listener, recv_data, MAX_LEN, 0, (struct sockaddr*)&clientAddr, &cliLen);
-				spin_time = atoi(recv_data+25) * 10;
-				assert(spin_time == 50 || spin_time == 1000);
+				spin_time = 10;
 				if (bytes_recv < 0) {
 					perror("recvfrom error");
 					exit(-1);

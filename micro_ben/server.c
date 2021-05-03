@@ -117,7 +117,8 @@ main(int argc, char *argv[]) {
 
    	serverAddr.sin_family = PF_INET;
    	serverAddr.sin_port = htons(opts.server_port);
-   	serverAddr.sin_addr.s_addr = inet_addr("10.10.1.2");
+   	//serverAddr.sin_addr.s_addr = inet_addr("10.10.1.2");
+   	serverAddr.sin_addr.s_addr = inet_addr("INADDR_ANY");
 	
     socklen_t cliLen = sizeof(clientAddr); 
 

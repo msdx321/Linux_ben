@@ -305,6 +305,7 @@ static inline void rqwheel_append_request(rqwheel_t *w, reqtype_t t, int k) {
            "w->head=%d\n", reqtype_str[t], w->nextrqid, w->th->stats[t].nsent,
            w->tail, w->head);
   }*/
+  printf("@@@@@@@@@@:%d\n", w->nextrqid);
 
   req_init(&w->rqs[w->head], t, w->nextrqid++, k);
   w->head = succ(w->head, w->size);
@@ -558,6 +559,7 @@ static void conn_init(conn_t *conn, int maxoutstanding, int maxmsgsize,
 
 
 static inline int compose_get(char *buf, int bufsize, int k) {
+	printf("aaaaaaaaaaaaa: %d\n", bufsize);
   return snprintf(buf, bufsize, "get " KEYPREFIX "-%06d\r\n", spin_time);
 }
 
@@ -962,11 +964,13 @@ static inline int dgram_ap_send(dgram_ap_t *ap, reqtype_t t) {
 
   to_udp_header(buf, ap->reqs.nextrqid, nreplyports);
   
+  printf("!!!!!!!!!!!%d\n", sizeof(buf)-8);
   if (t == req_get) {
 	  dgsize = compose_get(buf+8, sizeof(buf)-8, k) + 8;
   } else {
 	  dgsize = compose_set(buf+8, sizeof(buf)-8, k) + 8;
   }
+  printf("data: %s, size: %d\n", buf, dgsize);
 
   rv = sendto(ap->s, buf, dgsize, 0,
               (struct sockaddr*)&hostaddr_udp, sizeof(hostaddr_udp));

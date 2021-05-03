@@ -2,20 +2,22 @@
 CC=gcc
 CFLAGS=-Wall -O3 -g
 INCLUDE=-I .
-LIBS=
+LIBS=-lpthread
 CFILES=$(wildcard ./*.c)
 OBJS=$(patsubst %.c,%.o,$(CFILES))
-TARGETS=$(CFILES:%.c=%)
 
-all: $(TARGETS)
+all: server client
 
-$(TARGETs): %: %.o
-	$(CC) $(LIBS) -o $@ $<
+server: server.o
+	$(CC) $(CFLAGS) -o server server.o
+
+client: client.o cpu.o
+	$(CC) $(CFLAGS) -o client client.o cpu.o $(LIBS)
 
 $(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 clean:
-	@rm $(TARGETS) $(OBJS)
+	rm server client $(OBJS)
 
 .PHONY: all clean
