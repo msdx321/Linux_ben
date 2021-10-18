@@ -141,12 +141,16 @@ static inline void
 fprr_insert(unsigned int pos, struct dummy_thd *thd)
 {
 	assert(pos < 32);
+	unsigned long long e,s;
 
 	bitmap_set(fprr.lvl2, pos);
 	bitmap_set(fprr.lvl1, pos/LVL2_BITMAP_SZ);
 	//ps_list_rem_d(thd);
+	s = ben_tsc();
 	ps_list_head_append_d(&fprr.r[pos], thd);
 	assert(!ps_list_head_empty(&fprr.r[pos]));
+	e = ben_tsc();
+	printf("overehad: %llu", (e-s)/2100);
 }
 
 static inline void
@@ -203,11 +207,11 @@ fprr_ben(void)
 	}
 }
 
-/*static inline unsigned long long
+static inline unsigned long long
 current_offset(void)
 {
 	return ben_tsc() / DEADLINE_QUANTUM_LEN;
-}*/
+}
 
 static inline unsigned long
 rotr32(unsigned long value, unsigned int rotation)
