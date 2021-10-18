@@ -19,7 +19,7 @@ do
 -t 1 -k 100 \
 -z 135 -u $((dp)) \
 -f $((fp)) -r $((rate)) \
--d 30 10.10.1.2 > logs/mcb_$((fp)) &
+-d 30 127.0.0.1 > logs/mcb_$((fp)) &
 	echo "taskset -c $((core % total_core)) ./mcblaster -t 1 -k 100 -z 135 -u $((dp)) -f $((fp)) -r $((rate)) -d 30 10.10.1.2 > logs/mcb_$((fp)) &"
 
 	fp=$((fp+1))

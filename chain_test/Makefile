@@ -18,6 +18,6 @@ $(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 clean:
-	@rm server client $(OBJS)
+	rm server client $(OBJS)
 
 .PHONY: all clean
