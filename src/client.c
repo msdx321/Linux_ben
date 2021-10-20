@@ -1,11 +1,5 @@
 #define _GNU_SOURCE
 
-//#ifdef EOS_EXPR
-//#undef EOS_EXPR
-//#endif
-
-#define EOS_EXPR
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +14,7 @@
 #include "epoll_helper.h"
 #include "cpu.h"
 
-#define BASE_PORT 11211
+#define BASE_PORT 10001
 #define SAMPLE_NUM (10000 + 1)
 #define succ(n, size) (((n) + 1) % (size))
 #define KEYPREFIX "kkkkkkkkk"
@@ -52,6 +46,7 @@ typedef struct thread_s
 {
 	pthread_t pt;
 	stats_t stats;
+	int s_num;
 	int stime;
 	int cport;
 	int sport;
@@ -102,6 +97,7 @@ quantum_init(quantum_t *q, uint64_t size)
 }
 
 static int num = 1;
+static int s_num = 1;
 thread_t threads[2048];
 static int nb_hi = 0;
 pthread_attr_t attr[2048];
@@ -109,24 +105,13 @@ static int duration = 0;
 int HI_RATE = 20;
 int LO_RATE = 50;
 int malicious = 0;
-
-/*static inline uint64_t
-cycle_timer(void)
-{
-	uint32_t a, d;
-	uint64_t val;
-
-	asm volatile("rdtsc" : "=a" (a), "=d" (d));
-	val = ((uint64_t)a) | ((uint64_t)d << 32);
-
-	return val;
-}*/
+char *server_ip;
 
 void stoprecv(int sig)
 {
 	int i = 0;
 	printf("stop recv\n");
-	for (i = 0; i < num; i++)
+	for (i = 0; i < num * s_num; i++)
 	{
 		threads[i].stop = 1;
 	}
@@ -137,7 +122,7 @@ void stopthread(int sig)
 	int i;
 
 	printf("stop thread\n");
-	for (i = 0; i < num; i++)
+	for (i = 0; i < num * s_num; i++)
 	{
 		threads[i].done = 1;
 		//threads[i].stop = 1;
@@ -146,35 +131,6 @@ void stopthread(int sig)
 	signal(SIGALRM, stoprecv);
 	alarm(10);
 }
-
-/*static long
-get_us_interval(struct timeval *start, struct timeval *end)
-{
-	return (((end->tv_sec - start->tv_sec) * 1000000)
-		+ (end->tv_usec - start->tv_usec));
-}
-
-double
-get_cpu_frequency(void)
-{    
-	struct timeval start;
-	struct timeval end;
-	uint64_t tsc_start;
-	int64_t tsc_end;
-	long usec;
-
-	if (gettimeofday(&start, 0))
-		assert(0);
-	
-	tsc_start = cycle_timer(); 
-	usleep(10000);
-	
-	if (gettimeofday(&end, 0))
-		assert(0);
-    tsc_end = cycle_timer();
-		usec = get_us_interval(&start, &end);
-	return (tsc_end - tsc_start) * 1.0 / usec;
-}*/
 
 static inline void
 req_init(req_t *rq, uint32_t id)
@@ -386,6 +342,11 @@ void getopts(int argc, char **argv)
 			if (++count < argc)
 				num = atoi(argv[count]);
 		}
+		else if (strcmp(argv[count], "-s") == 0)
+		{
+			if (++count < argc)
+				s_num = atoi(argv[count]);
+		}
 		else if (strcmp(argv[count], "-rl") == 0)
 		{
 			if (++count < argc)
@@ -478,6 +439,7 @@ thread_main(void *arg)
 	udphdr_t udphdr;
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 	char buf[256];
+	char server_ip[32];
 	rqwheel_t *w;
 	int dgsize;
 	int idx = 0;
@@ -516,8 +478,11 @@ thread_main(void *arg)
 		exit(0);
 	}
 
+	sprintf(server_ip, "10.10.1.%d", th->s_num + 5); // Start from 10.10.1.5
+	//printf("target server_ip %s\n", server_ip);
+
 	servaddr.sin_family = AF_INET;
-	servaddr.sin_addr.s_addr = inet_addr("10.10.1.2");
+	servaddr.sin_addr.s_addr = inet_addr(server_ip);
 	servaddr.sin_port = htons(th->sport);
 	//printf("sport: %d, cport: %d\n", th->sport, th->cport);
 	setnonblocking(sockfd);
@@ -740,40 +705,16 @@ int main(int argc, char *argv[])
 	assert(argc > 1);
 	getopts(argc, argv);
 
-	for (i = 0; i < 2048; i++)
+	for (i = 0; i < num * s_num; i++)
 	{
 		threads[i].done = 0;
 		threads[i].stop = 0;
 		threads[i].cport = BASE_PORT + i;
-#ifdef EOS_EXPR
 		if (i < nb_hi)
 		{
 			threads[i].stime = HI_STIME;
-			threads[i].sport = BASE_PORT + HI_STIME;
-			threads[i].deadline = (unsigned long long)500000;
-			//		threads[i].deadline = (unsigned long long)1000000 / HI_RATE;
-			threads[i].rl = HI_RATE;
-		}
-		else if (i >= nb_hi && i < (nb_hi + malicious))
-		{
-			threads[i].stime = 11211;
-			threads[i].sport = BASE_PORT + 11211;
-			threads[i].deadline = (unsigned long long)500000;
-			threads[i].rl = 1;
-		}
-		else
-		{
-			threads[i].stime = LO_STIME;
-			threads[i].sport = BASE_PORT + LO_STIME;
-			threads[i].deadline = (unsigned long long)5000;
-			//	threads[i].deadline = (unsigned long long)1000000 / LO_RATE;
-			threads[i].rl = LO_RATE;
-		}
-#else
-		if (i < nb_hi)
-		{
-			threads[i].stime = HI_STIME;
-			threads[i].sport = threads[i].cport;
+			threads[i].s_num = i / num;
+			threads[i].sport = threads[i].cport + 20000;
 			//threads[i].deadline = (unsigned long long)1000000 / HI_RATE;
 			threads[i].deadline = (unsigned long long)500000;
 			threads[i].rl = HI_RATE;
@@ -781,19 +722,20 @@ int main(int argc, char *argv[])
 		else if (i >= nb_hi && i < (nb_hi + malicious))
 		{
 			threads[i].stime = 11211;
-			threads[i].sport = threads[i].cport;
+			threads[i].s_num = i / num;
+			threads[i].sport = threads[i].cport + 20000;
 			threads[i].deadline = (unsigned long long)500000;
 			threads[i].rl = 1;
 		}
 		else
 		{
 			threads[i].stime = LO_STIME;
+			threads[i].s_num = i / num;
 			threads[i].sport = threads[i].cport;
 			threads[i].deadline = (unsigned long long)5000;
 			//threads[i].deadline = (unsigned long long)1000 * 2;
 			threads[i].rl = LO_RATE;
 		}
-#endif
 	}
 
 	CPU_ZERO(&cpuset);
@@ -802,7 +744,7 @@ int main(int argc, char *argv[])
 		CPU_SET(i, &cpuset);
 	}
 
-	for (i = 0; i < num; i++)
+	for (i = 0; i < num * s_num; i++)
 	{
 		//printf("pthread creation\n");
 		pthread_attr_init(&attr[i]);
@@ -821,7 +763,7 @@ int main(int argc, char *argv[])
 	if (duration > 0)
 		alarm(duration);
 
-	for (i = 0; i < num; i++)
+	for (i = 0; i < num * s_num; i++)
 	{
 		ret = pthread_join(threads[i].pt, NULL);
 		if (ret != 0)
