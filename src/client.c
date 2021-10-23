@@ -468,7 +468,7 @@ thread_main(void *arg)
 	memset(&cliaddr, 0, sizeof(cliaddr));
 
 	cliaddr.sin_family = AF_INET;
-	cliaddr.sin_addr.s_addr = inet_addr("10.10.1.1");
+	cliaddr.sin_addr.s_addr = inet_addr("10.10.1.2");
 	cliaddr.sin_port = htons(th->cport);
 	//printf("client port: %d\n", BASE_PORT + th->idx);
 
@@ -478,7 +478,7 @@ thread_main(void *arg)
 		exit(0);
 	}
 
-	sprintf(server_ip, "10.10.1.%d", th->s_num + 5); // Start from 10.10.1.5
+	sprintf(server_ip, "10.10.%d.%d", (th->s_num / 128) + 1, (th->s_num % 128) + 5); // Start from 10.10.1.5
 	//printf("target server_ip %s\n", server_ip);
 
 	servaddr.sin_family = AF_INET;
@@ -710,19 +710,19 @@ int main(int argc, char *argv[])
 		threads[i].done = 0;
 		threads[i].stop = 0;
 		threads[i].cport = BASE_PORT + i;
-		if (i < nb_hi)
+		if ((i % num) < nb_hi)
 		{
 			threads[i].stime = HI_STIME;
-			threads[i].s_num = i / num;
+			threads[i].s_num = i / num + 1;
 			threads[i].sport = threads[i].cport + 20000;
 			//threads[i].deadline = (unsigned long long)1000000 / HI_RATE;
 			threads[i].deadline = (unsigned long long)500000;
 			threads[i].rl = HI_RATE;
 		}
-		else if (i >= nb_hi && i < (nb_hi + malicious))
+		else if ((i % num) >= nb_hi && (i % num) < (nb_hi + malicious))
 		{
 			threads[i].stime = 11211;
-			threads[i].s_num = i / num;
+			threads[i].s_num = i / num + 1;
 			threads[i].sport = threads[i].cport + 20000;
 			threads[i].deadline = (unsigned long long)500000;
 			threads[i].rl = 1;
@@ -730,7 +730,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			threads[i].stime = LO_STIME;
-			threads[i].s_num = i / num;
+			threads[i].s_num = i / num + 1;
 			threads[i].sport = threads[i].cport;
 			threads[i].deadline = (unsigned long long)5000;
 			//threads[i].deadline = (unsigned long long)1000 * 2;
